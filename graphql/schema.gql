@@ -1,0 +1,140 @@
+enum Thumb {
+    UP
+    Down
+}
+
+type TReply {
+    replies_Id: ID!
+    text: String!
+    thumb: Thumb!
+}
+
+type TReview {
+    reviews_Id: ID!
+    review: String!
+    replies: [TReply]
+    like_Count: Float!
+    dislike_Count: Float!
+}
+
+type TRecipeDetail {
+    description: String
+    ingrediants: String!
+    tags: String!
+}
+
+type TRecipe { 
+    recipe_ID: String!
+    recipe_Name: String!
+    recipe_details: TRecipeDetail
+    reviews: [TReview]!
+}
+
+type TRestaurant {
+    restaurant_Id: String!
+    restaurant_Name: String!
+    recipes: [TRecipe]!
+}
+
+type TFriendOfFriend {
+    friend_id: ID!,
+    friend_Name: String!
+}
+
+type TFriend {
+    id: ID!
+    friend_Name: String!
+    friends: [TFriendOfFriend]!
+}
+
+type TUser {
+    user_Id: ID!
+    user_Name: String!
+    user_email: String!
+    restaurants: [TRestaurant]!
+    friends: [TFriend]!
+}
+
+type TRecommendation {
+    friends: [TFriend]!
+    restaurants: [TRestaurant]!
+}
+
+input NewFriendInput { 
+    id: ID!
+    user_id: ID!
+    friend_Name: String!
+}
+
+input NewUserInput {
+    user_Id: ID!
+    user_Name: String!
+    user_email: String!
+}
+
+input NewRestaurantInput {
+    restaurant_Id: ID!
+    owner_id: ID!
+    restaurant_Name: String!
+}
+
+input ReplyInput {
+    replies_Id: ID!
+    text: String
+    thumb: Thumb!
+}
+
+input ReviewInput {
+    reviews_Id: ID!
+    recipe_Id: ID!
+    review: String!
+}
+
+input RecipeInput {
+    recipe_ID: String!
+    restaurant_Id: String!
+    recipe_Name: String!
+}
+
+type Query {
+    recommendations: TRecommendation ## get recommended friends and their retaurants after signup
+    get_user(user_id: ID!): TUser ## get user info
+    get_friend(friend_id: ID!): TFriend 
+    get_recipe(recipe_id: ID!): TRecipe
+    get_restaurant(restaurant_id: ID!): TRestaurant
+    get_friendOfFriend(friend_id: ID!): TFriendOfFriend ## get single friend of your friend
+    get_review(id: ID!): TReview ## get single review of a recipe
+    all_users: [TUser]! 
+    all_freinds(user_Id: ID!): [TFriend]! 
+    all_recipes(restaurant_Id: ID!): [TRecipe]! ## all recipes of your specific restaurant
+    all_reviews(recipe_id: ID!): [TReview]! ## all reviews your specific recipes
+    all_restaurants(user_id: ID!): [TRestaurant] ## all restaurant
+    all_friendOfFreind(friend_id: ID!): [TFriendOfFriend]! ## list of your friend-of-friends
+}
+
+type Mutation {
+    add_user(new_user: NewUserInput!): TUser! ## signin/signup
+    add_friend(new_friend: NewFriendInput!): TFriend! ##  follow a friend
+    add_restaurant(new_restaurant: NewRestaurantInput!): TRestaurant! ## add restaurant
+    create_recipe(recipe: RecipeInput!): TRecipe! ## make a new recipe in your specific restaurant
+    create_review(review: ReviewInput!): TReview! ## give review on specific recipe
+}
+
+type Subscription {
+  onAddUser: TUser
+    @aws_subscribe(mutations: ["add_user"])
+  onAddFriend: TFriend
+    @aws_subscribe(mutations: ["add_friend"])
+  onAddRestaurant: TRestaurant
+    @aws_subscribe(mutations: ["add_restaurant"])
+  onCreateRecipe: TRecipe
+    @aws_subscribe(mutations: ["create_recipe"])
+  onCreateReview: TReview
+    @aws_subscribe(mutations: ["create_review"])
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
