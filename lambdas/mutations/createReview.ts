@@ -9,6 +9,7 @@ async function createReview(recipeReview: Review) {
     try {
         const query = `INSERT INTO reviews (id,recipeid,review) VALUES(:id,:recipeId,:review)`;
         await db.query(query, { id, recipeId, review });
+        console.log("recipeReview ==>", recipeReview);
         return {
             statusCode: 200,
             headers: { "Content-Type": "application/json" },

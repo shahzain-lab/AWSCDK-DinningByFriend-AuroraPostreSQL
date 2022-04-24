@@ -7,8 +7,10 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as eventsTargets from 'aws-cdk-lib/aws-events-targets'
 import { GQL_MUTATIONS } from '../utils/mutations';
-import { MUTATION_EVENT_SOURCE, mutRequestTemplate, mutResponseTemplate } from '../utils/appsync-mutation-template';
-import { QUERY_EVENT_SOURCE, queRequestTemplate,queresponseTemplate } from '../utils/appsync-query-template';
+import * as stepFunctions from "aws-cdk-lib/aws-stepfunctions";
+import * as stepFunctionTasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import { APPSYNC_EVENT_SOURCE, mutRequestTemplate, mutResponseTemplate } from '../utils/appsync-mutation-template';
+import { queRequestTemplate,queresponseTemplate } from '../utils/appsync-query-template';
 import { GQL_QUERIES } from '../utils/queries';
 
 export class AwscdkDinningByFriendAuroraPostreSqlStack extends cdk.Stack {
@@ -136,21 +138,73 @@ export class AwscdkDinningByFriendAuroraPostreSqlStack extends cdk.Stack {
       });
     });
 
+    const requestFilterHandler = new lambda.Function(this, 'requestFilterHandler',{
+      functionName: `dinningByFriend-requestFilterHandler`,
+      runtime: lambda.Runtime.NODEJS_14_X,
+      code: lambda.Code.fromAsset('lambdas'),
+      handler: `index.handler`,
+      memorySize: 1024,
+    })
+
+    const lambdaIndex = new stepFunctionTasks.LambdaInvoke(
+      this,
+      "requestFilterHandlerlambda",
+      {
+        lambdaFunction: requestFilterHandler,
+      }
+    );
+
+
+    const mutationHandler = new stepFunctionTasks.LambdaInvoke(
+      this,
+      "mutationHandlerlambda",
+      {
+        lambdaFunction: lambdaFn["mutationHandler"]!,
+      }
+    );
+
+    const queryHandler = new stepFunctionTasks.LambdaInvoke(
+      this,
+      "queryHandlerlambda",
+      {
+        lambdaFunction: lambdaFn["queryHandler"]!,
+      }
+    );
+
+
+    const choice = new stepFunctions.Choice(this, "operation successful?");
+    choice.when(
+      stepFunctions.Condition.stringEquals(
+        "$.Payload.operation",
+        "mutation"
+      ),
+      mutationHandler
+    );
+    choice.when(
+      stepFunctions.Condition.stringEquals(
+        "$.Payload.operation",
+        "query"
+      ),
+      queryHandler
+    );
+
+    // creating chain to define the sequence of execution
+
+    const chain = stepFunctions.Chain.start(lambdaIndex).next(choice);
+
+    // create a state machine
+
+    const stateMechine = new stepFunctions.StateMachine(this, "choiceStateMachine", {
+      stateMachineName: 'dinningByFriend-stateMechine',
+      definition: chain,
+    });
 
     new events.Rule(this, "eventConsumerRule", {
       eventPattern: {
-        source: [MUTATION_EVENT_SOURCE],
-        detailType: [...GQL_MUTATIONS,],
+        source: [APPSYNC_EVENT_SOURCE],
+        detailType: [...GQL_MUTATIONS,...GQL_QUERIES],
       },
-      targets: [new eventsTargets.LambdaFunction(lambdaFn["mutationHandler"]!)]
-    });
-
-    new events.Rule(this, "eventConsumerRuleQueries", {
-      eventPattern: {
-        source: [QUERY_EVENT_SOURCE],
-        detailType: [...GQL_QUERIES,],
-      },
-      targets: [new eventsTargets.LambdaFunction(lambdaFn["queryHandler"]!)]
+      targets: [new eventsTargets.SfnStateMachine(stateMechine)]
     });
     
   }

@@ -1,4 +1,5 @@
-export const QUERY_EVENT_SOURCE = "dinningByFriend-app-queries"
+import { APPSYNC_EVENT_SOURCE } from "./appsync-mutation-template"
+
 
 export const queRequestTemplate = (detail:string, detailType:string)=>{
 
@@ -15,7 +16,7 @@ export const queRequestTemplate = (detail:string, detailType:string)=>{
             "Entries":[
               {
                 "DetailType":"${detailType}",
-                "Source":"${QUERY_EVENT_SOURCE}",
+                "Source":"${APPSYNC_EVENT_SOURCE}",
                 "EventBusName": "default",
                 "Detail": "{${detail}}"
               }

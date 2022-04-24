@@ -9,7 +9,8 @@ async function createRecipe(recipe: Recipe) {
     try {
         const query = `INSERT INTO recipes (id,restaurantid,recipename) VALUES(:id,:restaurantId,:recipename)`;
         await db.query(query, { id, restaurantId, recipename });
-        return {
+        console.log("recipe ==>", recipe);
+         return {
             statusCode: 200,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(recipe),

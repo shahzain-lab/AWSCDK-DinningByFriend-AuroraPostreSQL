@@ -1,4 +1,4 @@
-export const MUTATION_EVENT_SOURCE = "dinningByFriend-app-mutations"
+export const APPSYNC_EVENT_SOURCE = "dinningByFriend-app-events"
 
 export const mutRequestTemplate = (detail:string, detailType:string)=>{
 
@@ -15,7 +15,7 @@ export const mutRequestTemplate = (detail:string, detailType:string)=>{
             "Entries":[
               {
                 "DetailType":"${detailType}",
-                "Source":"${MUTATION_EVENT_SOURCE}",
+                "Source":"${APPSYNC_EVENT_SOURCE}",
                 "EventBusName": "default",
                 "Detail": "{${detail}}"
               }

@@ -9,7 +9,8 @@ async function addFriend(friend: Friend) {
     try {
         const query = `INSERT INTO friends (id,userid,friendname) VALUES(:id,:userId,:friendname)`;
          await db.query(query, { id, userId, friendname });
-        return {
+         console.log("frieend ==>", friend);
+         return {
             statusCode: 200,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(friend),

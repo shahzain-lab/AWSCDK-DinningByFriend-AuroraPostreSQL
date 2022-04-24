@@ -9,10 +9,16 @@ async function addRestaurant(restaurant: Restaurant) {
     try {
         const query = `INSERT INTO restaurant (id,ownerid,restaurantname) VALUES(:id,:ownerId,:restaurantname)`;
          await db.query(query, { id, ownerId, restaurantname });
+         console.log("restauant ==>", restaurant);
+         const data = {
+            restaurant_Id: restaurant.id,
+            restaurant_Name: restaurant.restaurantname,
+            recipes: []
+         }
         return {
             statusCode: 200,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(restaurant),
+            body: JSON.stringify(data),
         };
     } catch (err) {
         console.log('Postgres error: ', err);
