@@ -101,7 +101,7 @@ export class AwscdkDinningByFriendAuroraPostreSqlStack extends cdk.Stack {
         typeName: "Mutation",
         fieldName: mut,
         requestMappingTemplate: appsync.MappingTemplate.fromString(mutRequestTemplate(details, mut)),
-        responseMappingTemplate: appsync.MappingTemplate.fromString(mutResponseTemplate()),
+        responseMappingTemplate: appsync.MappingTemplate.lambdaResult(),
       });
     });
 
@@ -134,7 +134,7 @@ export class AwscdkDinningByFriendAuroraPostreSqlStack extends cdk.Stack {
         typeName: "Query",
         fieldName: query,
         requestMappingTemplate: appsync.MappingTemplate.fromString(queRequestTemplate(details, query)),
-        responseMappingTemplate: appsync.MappingTemplate.fromString(queresponseTemplate()),
+        responseMappingTemplate: appsync.MappingTemplate.lambdaResult(),
       });
     });
 

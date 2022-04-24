@@ -12,22 +12,30 @@ export const handler = async (event: EventBridgeEvent<string, any>, context: Con
 
         if (event["detail-type"] === "add_user") {
 
-                return await addUser(event.detail);
-
+                const user = await addUser(event.detail);
+                console.log("returned user", user);
+                return user
         }else if (event["detail-type"] === "add_friend"){
 
-                return await addFriend(event.detail);
-
+                const friend = await addFriend(event.detail);
+                console.log("returned user", friend);
+                return friend
         }else if(event["detail-type"] === "add_restaurant") {
 
-                return await addRestaurant(event.detail);
+                const restaurant = await addRestaurant(event.detail);
+                console.log("returned user", restaurant);
+                return restaurant
 
         }else if(event["detail-type"] === "create_recipe") {
 
-                return await createRecipe(event.detail);
+                const recipe = await createRecipe(event.detail);
+                console.log("returned user", recipe);
+                return recipe
 
         }else if(event["detail-type"] === "create_review") {
 
-                return await createReview(event.detail);
+                const review = await createReview(event.detail);
+                console.log("returned user", review);
+                return review
         }
 }
